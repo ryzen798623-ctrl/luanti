@@ -103,33 +103,50 @@ JoystickLayout create_xbox_layout()
 	};
 	memcpy(jlo.axes, axes, sizeof(jlo.axes));
 
-	// The back button means "ESC".
-	JLO_B_PB(KeyType::ESC,        1 << 8,  1 << 8); // back
-	JLO_B_PB(KeyType::ESC,        1 << 9,  1 << 9); // start
+	// HANAMI : mapping manette configurable via minetest.conf (modifiable SANS recompiler).
+	// Ex dans minetest.conf : "joystick_xbox_rt = place". Defauts = style Minecraft.
+	auto K = [](const char *setting, KeyType def) -> KeyType {
+		std::string v;
+		if (!g_settings->getNoEx(std::string(setting), v) || v.empty())
+			return def;
+		v = lowercase(v);
+		if (v == "jump" || v == "saut") return KeyType::JUMP;
+		if (v == "sneak" || v == "accroupir") return KeyType::SNEAK;
+		if (v == "dig" || v == "mine" || v == "miner" || v == "attack") return KeyType::DIG;
+		if (v == "place" || v == "use" || v == "poser" || v == "utiliser") return KeyType::PLACE;
+		if (v == "aux1" || v == "sprint" || v == "courir") return KeyType::AUX1;
+		if (v == "inventory" || v == "inv" || v == "inventaire") return KeyType::INVENTORY;
+		if (v == "esc" || v == "pause" || v == "menu") return KeyType::ESC;
+		if (v == "drop" || v == "jeter") return KeyType::DROP;
+		if (v == "camera" || v == "camera_mode" || v == "vue") return KeyType::CAMERA_MODE;
+		if (v == "zoom") return KeyType::ZOOM;
+		if (v == "hotbar_prev" || v == "prev" || v == "precedent") return KeyType::HOTBAR_PREV;
+		if (v == "hotbar_next" || v == "next" || v == "suivant") return KeyType::HOTBAR_NEXT;
+		if (v == "screenshot" || v == "capture") return KeyType::SCREENSHOT;
+		if (v == "freemove" || v == "fly" || v == "vol") return KeyType::FREEMOVE;
+		if (v == "fastmove" || v == "fast" || v == "rapide") return KeyType::FASTMOVE;
+		if (v == "chat") return KeyType::CHAT;
+		if (v == "minimap") return KeyType::MINIMAP;
+		return def;
+	};
 
-	// 4 Buttons
-	JLO_B_PB(KeyType::JUMP,        1 << 0,  1 << 0); // A/green
-	JLO_B_PB(KeyType::SNEAK, 1 << 1, 1 << 1); // B = accroupir (MC) // B/red
-	JLO_B_PB(KeyType::AUX1,        1 << 2,  1 << 2); // X/blue
-	JLO_B_PB(KeyType::INVENTORY,   1 << 3,  1 << 3); // Y/yellow
+	JLO_B_PB(K("joystick_xbox_back",   KeyType::ESC),         1 << 8,  1 << 8);
+	JLO_B_PB(K("joystick_xbox_start",  KeyType::ESC),         1 << 9,  1 << 9);
+	JLO_B_PB(K("joystick_xbox_a",      KeyType::JUMP),        1 << 0,  1 << 0);
+	JLO_B_PB(K("joystick_xbox_b",      KeyType::SNEAK),       1 << 1,  1 << 1);
+	JLO_B_PB(K("joystick_xbox_x",      KeyType::AUX1),        1 << 2,  1 << 2);
+	JLO_B_PB(K("joystick_xbox_y",      KeyType::INVENTORY),   1 << 3,  1 << 3);
+	JLO_B_PB(K("joystick_xbox_l3",     KeyType::AUX1),        1 << 11, 1 << 11);
+	JLO_B_PB(K("joystick_xbox_r3",     KeyType::CAMERA_MODE), 1 << 12, 1 << 12);
+	JLO_B_PB(K("joystick_xbox_lt",     KeyType::PLACE),       1 << 6,  1 << 6);
+	JLO_B_PB(K("joystick_xbox_rt",     KeyType::DIG),         1 << 7,  1 << 7);
+	JLO_B_PB(K("joystick_xbox_lb",     KeyType::HOTBAR_PREV), 1 << 4,  1 << 4);
+	JLO_B_PB(K("joystick_xbox_rb",     KeyType::HOTBAR_NEXT), 1 << 5,  1 << 5);
+	JLO_B_PB(K("joystick_xbox_dup",    KeyType::ZOOM),        1 << 15, 1 << 15);
+	JLO_B_PB(K("joystick_xbox_dleft",  KeyType::DROP),        1 << 13, 1 << 13);
+	JLO_B_PB(K("joystick_xbox_dright", KeyType::SCREENSHOT),  1 << 14, 1 << 14);
+	JLO_B_PB(K("joystick_xbox_ddown",  KeyType::FREEMOVE),    1 << 16, 1 << 16);
 
-	// Analog Sticks
-	JLO_B_PB(KeyType::AUX1,        1 << 11, 1 << 11); // left
-	JLO_B_PB(KeyType::CAMERA_MODE, 1 << 12, 1 << 12); // R3 = vue // right
-
-	// Triggers
-	JLO_B_PB(KeyType::PLACE, 1 << 6, 1 << 6); // LT = poser (MC) // lt
-	JLO_B_PB(KeyType::DIG, 1 << 7, 1 << 7); // RT = miner (MC) // rt
-	JLO_B_PB(KeyType::HOTBAR_PREV, 1 << 4,  1 << 4); // lb
-	JLO_B_PB(KeyType::HOTBAR_NEXT, 1 << 5,  1 << 5); // rb
-
-	// D-PAD
-	JLO_B_PB(KeyType::ZOOM,        1 << 15, 1 << 15); // up
-	JLO_B_PB(KeyType::DROP,        1 << 13, 1 << 13); // left
-	JLO_B_PB(KeyType::SCREENSHOT,  1 << 14, 1 << 14); // right
-	JLO_B_PB(KeyType::FREEMOVE,    1 << 16, 1 << 16); // down
-
-	// Movement buttons, important for vessels
 	JLO_A_PB(KeyType::FORWARD,  1,  1, jlo.axes_deadzone);
 	JLO_A_PB(KeyType::BACKWARD, 1, -1, jlo.axes_deadzone);
 	JLO_A_PB(KeyType::LEFT,     0,  1, jlo.axes_deadzone);
