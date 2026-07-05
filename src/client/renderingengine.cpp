@@ -313,6 +313,18 @@ void RenderingEngine::draw_load_screen(const std::wstring &text,
 	driver->setFog(m_menu_sky_color);
 	driver->beginScene(true, true, m_menu_sky_color);
 
+	// HANAMI: fond de chargement personnalise
+	{
+		video::ITexture *hanami_bg = tsrc->getTexture("hanami_loading_bg.png");
+		if (hanami_bg) {
+			core::dimension2du bgsize = hanami_bg->getOriginalSize();
+			draw2DImageFilterScaled(driver, hanami_bg,
+				core::rect<s32>(0, 0, screensize.X, screensize.Y),
+				core::rect<s32>(0, 0, bgsize.Width, bgsize.Height),
+				0, 0, true);
+		}
+	}
+
 	if (g_settings->getBool("menu_clouds")) {
 		g_menuclouds->step(dtime * 3);
 		g_menucloudsmgr->drawAll();

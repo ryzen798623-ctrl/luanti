@@ -109,17 +109,17 @@ JoystickLayout create_xbox_layout()
 
 	// 4 Buttons
 	JLO_B_PB(KeyType::JUMP,        1 << 0,  1 << 0); // A/green
-	JLO_B_PB(KeyType::ESC,         1 << 1,  1 << 1); // B/red
+	JLO_B_PB(KeyType::SNEAK, 1 << 1, 1 << 1); // B = accroupir (MC) // B/red
 	JLO_B_PB(KeyType::AUX1,        1 << 2,  1 << 2); // X/blue
 	JLO_B_PB(KeyType::INVENTORY,   1 << 3,  1 << 3); // Y/yellow
 
 	// Analog Sticks
 	JLO_B_PB(KeyType::AUX1,        1 << 11, 1 << 11); // left
-	JLO_B_PB(KeyType::SNEAK,       1 << 12, 1 << 12); // right
+	JLO_B_PB(KeyType::CAMERA_MODE, 1 << 12, 1 << 12); // R3 = vue // right
 
 	// Triggers
-	JLO_B_PB(KeyType::DIG,         1 << 6,  1 << 6); // lt
-	JLO_B_PB(KeyType::PLACE,       1 << 7,  1 << 7); // rt
+	JLO_B_PB(KeyType::PLACE, 1 << 6, 1 << 6); // LT = poser (MC) // lt
+	JLO_B_PB(KeyType::DIG, 1 << 7, 1 << 7); // RT = miner (MC) // rt
 	JLO_B_PB(KeyType::HOTBAR_PREV, 1 << 4,  1 << 4); // lb
 	JLO_B_PB(KeyType::HOTBAR_NEXT, 1 << 5,  1 << 5); // rb
 
