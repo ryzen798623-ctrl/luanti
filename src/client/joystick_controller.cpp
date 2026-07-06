@@ -105,7 +105,7 @@ JoystickLayout create_xbox_layout()
 
 	// HANAMI : mapping manette configurable via minetest.conf (modifiable SANS recompiler).
 	// Ex dans minetest.conf : "joystick_xbox_rt = place". Defauts = style Minecraft.
-	auto K = [](const char *setting, KeyType def) -> KeyType {
+	auto K = [](const char *setting, KeyType::T def) -> KeyType::T {
 		std::string v;
 		if (!g_settings->getNoEx(std::string(setting), v) || v.empty())
 			return def;
