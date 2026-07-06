@@ -8,6 +8,7 @@
 #include "porting.h"
 #include "util/string.h"
 #include "util/numeric.h"
+#include "log.h"
 
 bool JoystickButtonCmb::isTriggered(const SEvent::SJoystickEvent &ev) const
 {
@@ -130,27 +131,34 @@ JoystickLayout create_xbox_layout()
 		return def;
 	};
 
-	JLO_B_PB(K("joystick_xbox_back",   KeyType::ESC),         1 << 8,  1 << 8);
-	JLO_B_PB(K("joystick_xbox_start",  KeyType::ESC),         1 << 9,  1 << 9);
+	// Boutons : numerotation standard SDL/XInput
+	// A=0,B=1,X=2,Y=3,LB=4,RB=5,Back=6,Start=7,L3=8,R3=9.
+	// Chaque action reste modifiable dans minetest.conf (ex: joystick_xbox_b = jump).
 	JLO_B_PB(K("joystick_xbox_a",      KeyType::JUMP),        1 << 0,  1 << 0);
 	JLO_B_PB(K("joystick_xbox_b",      KeyType::SNEAK),       1 << 1,  1 << 1);
 	JLO_B_PB(K("joystick_xbox_x",      KeyType::AUX1),        1 << 2,  1 << 2);
 	JLO_B_PB(K("joystick_xbox_y",      KeyType::INVENTORY),   1 << 3,  1 << 3);
-	JLO_B_PB(K("joystick_xbox_l3",     KeyType::AUX1),        1 << 11, 1 << 11);
-	JLO_B_PB(K("joystick_xbox_r3",     KeyType::CAMERA_MODE), 1 << 12, 1 << 12);
-	JLO_B_PB(K("joystick_xbox_lt",     KeyType::PLACE),       1 << 6,  1 << 6);
-	JLO_B_PB(K("joystick_xbox_rt",     KeyType::DIG),         1 << 7,  1 << 7);
 	JLO_B_PB(K("joystick_xbox_lb",     KeyType::HOTBAR_PREV), 1 << 4,  1 << 4);
 	JLO_B_PB(K("joystick_xbox_rb",     KeyType::HOTBAR_NEXT), 1 << 5,  1 << 5);
-	JLO_B_PB(K("joystick_xbox_dup",    KeyType::ZOOM),        1 << 15, 1 << 15);
-	JLO_B_PB(K("joystick_xbox_dleft",  KeyType::DROP),        1 << 13, 1 << 13);
-	JLO_B_PB(K("joystick_xbox_dright", KeyType::SCREENSHOT),  1 << 14, 1 << 14);
-	JLO_B_PB(K("joystick_xbox_ddown",  KeyType::FREEMOVE),    1 << 16, 1 << 16);
+	JLO_B_PB(K("joystick_xbox_back",   KeyType::DROP),        1 << 6,  1 << 6);
+	JLO_B_PB(K("joystick_xbox_start",  KeyType::ESC),         1 << 7,  1 << 7);
+	JLO_B_PB(K("joystick_xbox_l3",     KeyType::AUX1),        1 << 8,  1 << 8);
+	JLO_B_PB(K("joystick_xbox_r3",     KeyType::CAMERA_MODE), 1 << 9,  1 << 9);
+	// D-pad (souvent boutons 10-13 en SDL)
+	JLO_B_PB(K("joystick_xbox_dup",    KeyType::ZOOM),        1 << 10, 1 << 10);
+	JLO_B_PB(K("joystick_xbox_ddown",  KeyType::FREEMOVE),    1 << 11, 1 << 11);
+	JLO_B_PB(K("joystick_xbox_dleft",  KeyType::DROP),        1 << 12, 1 << 12);
+	JLO_B_PB(K("joystick_xbox_dright", KeyType::SCREENSHOT),  1 << 13, 1 << 13);
 
+	// Deplacement : stick gauche = axes 0,1 ; camera = axes 2,3 (deja regle plus haut)
 	JLO_A_PB(KeyType::FORWARD,  1,  1, jlo.axes_deadzone);
 	JLO_A_PB(KeyType::BACKWARD, 1, -1, jlo.axes_deadzone);
 	JLO_A_PB(KeyType::LEFT,     0,  1, jlo.axes_deadzone);
 	JLO_A_PB(KeyType::RIGHT,    0, -1, jlo.axes_deadzone);
+
+	// Gachettes en AXES (LT = axe 4 -> poser, RT = axe 5 -> miner), style Minecraft
+	JLO_A_PB(K("joystick_xbox_rt", KeyType::DIG),   5, -1, 12000);
+	JLO_A_PB(K("joystick_xbox_lt", KeyType::PLACE), 4, -1, 12000);
 
 	return jlo;
 }
@@ -301,6 +309,26 @@ bool JoystickController::handleEvent(const SEvent::SJoystickEvent &ev)
 		return false;
 
 	m_internal_time = porting::getTimeMs() / 1000.f;
+
+	// HANAMI : mode debug manette. minetest.conf -> joystick_debug = true
+	// Affiche dans debug.txt le NUMERO de chaque bouton presse + les axes.
+	{
+		std::string _dv;
+		if (g_settings->getNoEx("joystick_debug", _dv) && is_yes(_dv)) {
+			static thread_local u32 s_last_btn = 0xFFFFFFFFu;
+			if (ev.ButtonStates != s_last_btn) {
+				s_last_btn = ev.ButtonStates;
+				std::string b;
+				for (int i = 0; i < 32; i++)
+					if (ev.ButtonStates & (1u << i))
+						b += " b" + std::to_string(i);
+				warningstream << "[HANAMI manette] boutons:" << b << " | axes:";
+				for (int a = 0; a < 6; a++)
+					warningstream << " a" << a << "=" << (int) ev.Axis[a];
+				warningstream << std::endl;
+			}
+		}
+	}
 
 	std::bitset<KeyType::INTERNAL_ENUM_COUNT> keys_pressed;
 
