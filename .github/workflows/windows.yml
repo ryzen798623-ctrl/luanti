@@ -55,7 +55,7 @@ jobs:
       - name: Build
         run: |
            EXISTING_MINETEST_DIR=$PWD \
-           ./util/buildbot/buildwin${{ matrix.config.bits }}.sh B
+           ./util/buildbot/buildwin${{ matrix.config.bits }}.sh B -DRUN_IN_PLACE=0
            mkdir -p artifact
            cp -v B/build/*.zip artifact/
 
